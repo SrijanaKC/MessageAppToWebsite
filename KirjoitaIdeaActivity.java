@@ -1,31 +1,47 @@
-package com.example.srijanakc.sanopalaute;
+ package com.example.srijanakc.sanopalaute;
 
-import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
+import android.os.AsyncTask;
 
-import okhttp3.OkHttpClient;
+import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
-public class KirjoitaIdeaActivity extends AppCompatActivity {
+public class KirjoitaIdeaActivity extends AsyncTask<String,String,String> {
+
+
+    public KirjoitaIdeaActivity (){
+        //set context variables if required
+    }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_kirjoita_idea);
+    protected void onPreExecute() {
+        super.onPreExecute();
+    }
 
-        Button button = (Button) findViewById(R.id.submit);
+    @Override
+    protected String doInBackground(String... params) {
+        String urlString = params[0]; // URL to call
+        String data = params[1]; //data to post
+        OutputStream out = null;
 
+        try {
+            URL url = new URL(urlString);
+            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            out = new BufferedOutputStream(urlConnection.getOutputStream());
 
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
+            writer.write(data);
+            writer.flush();
+            writer.close();
+            out.close();
 
-                startActivity(new Intent(KirjoitaIdeaActivity.this, PopUpActivity.class));
-
-            }
-        });
+            urlConnection.connect();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return urlString;
     }
 }
